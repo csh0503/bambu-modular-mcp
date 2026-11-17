@@ -1,0 +1,35 @@
+{
+  "name": "bambu-modular-mcp",
+  "version": "2.1.0",
+  "description": "Ultra-fast 4-tool modular slicing & print control MCP server for all Bambu Lab printers (X1C, P1S, P1P, P2S, A1, A1 mini, H2D, H2S) with community-extensible print recipes.",
+  "type": "module",
+  "main": "index.mjs",
+  "bin": {
+    "bambu-modular-mcp": "./index.mjs"
+  },
+  "scripts": {
+    "start": "node index.mjs",
+    "postinstall": "node scripts/apply-p2s-patches.mjs"
+  },
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "bambu-lab",
+    "3d-printing",
+    "bambu-studio",
+    "x1c",
+    "p1s",
+    "p2s",
+    "a1",
+    "h2d"
+  ],
+  "license": "GPL-2.0-only",
+  "engines": {
+    "node": ">=18.18.0"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.32.1",
+    "bambu-printer-mcp": "1.1.79",
+    "jszip": "^3.10.2"
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "id": "extra_thick_fuzzy",
+  "title": "Coarse Stone-Like Fuzzy Skin",
+  "author": "your-github-handle",
+  "tested_on": ["X1C 0.4mm", "PLA Matte"],
+  "source_or_notes": "Coarser external Perlin texture for planters and grip handles.",
+  "process": {
+    "fuzzy_skin": "external",
+    "fuzzy_skin_noise_type": "perlin",
+    "fuzzy_skin_thickness": "0.25",
+    "fuzzy_skin_point_distance": "0.60",
+    "seam_position": "back"
+  },
+  "by_material": {
+    "PETG": {
+      "process": {
+        "fuzzy_skin_thickness": "0.18"
+      }
+    }
+  }
+}

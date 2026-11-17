@@ -1,0 +1,50 @@
+name: "🧪 Share / Improve a Print Preset or Modifier (分享／修正列印配方)"
+description: "Share a battle-tested Bambu Studio print recipe, or report a better parameter value for an existing preset/modifier!"
+title: "[Recipe] "
+labels: ["print-recipe", "community"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for helping improve `bambu-modular-mcp`! The built-in presets were initially curated from public online guides — real-world prints from the community make them genuinely battle-tested.
+        感謝分享你的實測參數！本專案的初始配方整理自網路公開指南，非常歡迎大家貼上實印驗證過的設定來一起完善它。
+  - type: dropdown
+    id: kind
+    attributes:
+      label: Recipe Type / 類型
+      options:
+        - Improve an existing Preset / Modifier (優化現有場景或積木)
+        - Add a new Scene Preset (新增主場景基底)
+        - Add a new Stackable Modifier (新增可疊加功能積木)
+    validations:
+      required: true
+  - type: input
+    id: hardware
+    attributes:
+      label: Printer Model & Nozzle / 測試機型與噴嘴口徑
+      placeholder: "e.g. P1S 0.4mm Standard / A1 mini 0.2mm / P2S 0.6mm Hardened Steel"
+    validations:
+      required: true
+  - type: input
+    id: filament
+    attributes:
+      label: Filament Brand & Material / 耗材品牌與材質
+      placeholder: "e.g. Bambu PETG HF / eSUN PLA+ / Polymaker ASA"
+    validations:
+      required: true
+  - type: textarea
+    id: parameters
+    attributes:
+      label: Key Slicer Settings or JSON / 關鍵參數或 JSON 設定
+      description: "Paste Bambu Studio parameter values, screenshots of your slicer changes, or a `community-presets` JSON snippet."
+      placeholder: |
+        - Layer height: 0.20mm
+        - Ironing flow: 15%, speed: 30mm/s
+        - Why this works better: ...
+    validations:
+      required: true
+  - type: textarea
+    id: notes
+    attributes:
+      label: Print Result & Photos (Optional) / 實印效果與照片（選填）
+      description: "Feel free to drag-and-drop print photos or compare before/after!"
