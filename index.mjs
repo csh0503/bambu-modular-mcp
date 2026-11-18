@@ -110,6 +110,72 @@ const PATH_MAPPINGS = (process.env.BAMBU_PATH_MAP || "")
   .filter(Boolean);
 
 const bambu = new BambuImplementation();
+const origFtpUpload = bambu.ftpUpload.bind(bambu);
+bambu.ftpUpload = async (host, token, localPath, remotePath, onProgress) => {
+  if (host === "127.0.0.1" && SSH_BRIDGE_TARGET && PRINTER_HOST !== "127.0.0.1") {
+    const absoluteRemote = remotePath.startsWith("/") ? remotePath : `/${remotePath}`;
+    const encodedRemote = absoluteRemote
+      .split("/")
+      .map((seg) => encodeURIComponent(seg))
+      .join("/");
+    const totalBytes = (await fs.promises.stat(localPath)).size;
+    if (onProgress) onProgress(0, totalBytes);
+    const shQuote = (v) => `'${String(v).replace(/'/g, "'\\''")}'`;
+    const remoteUrl = `ftps://${PRINTER_HOST}:990${encodedRemote}`;
+    const remoteCmd = `curl -k -sS --ftp-create-dirs -u ${shQuote(`bblp:${token}`)} -T - ${shQuote(remoteUrl)}`;
+    await new Promise((resolve, reject) => {
+      const proc = spawn(
+        "ssh",
+        [
+          "-o", "BatchMode=yes",
+          "-o", "StrictHostKeyChecking=no",
+          "-p", SSH_BRIDGE_PORT,
+          SSH_BRIDGE_TARGET,
+          remoteCmd,
+        ],
+        { stdio: ["pipe", "pipe", "pipe"], windowsHide: true }
+      );
+      let stderr = "";
+      let settled = false;
+      const fail = (err) => {
+        if (settled) return;
+        settled = true;
+        reject(err);
+      };
+      proc.stderr.on("data", (d) => {
+        stderr += d.toString("utf8");
+      });
+      proc.on("error", (err) => fail(err));
+      proc.stdin.on("error", (err) => {
+        if (err?.code !== "EPIPE") fail(err);
+      });
+      const rs = fs.createReadStream(localPath);
+      let sent = 0;
+      rs.on("data", (chunk) => {
+        sent += chunk.length;
+        if (onProgress) onProgress(Math.min(sent, totalBytes), totalBytes);
+      });
+      rs.on("error", (err) => {
+        proc.kill();
+        fail(err);
+      });
+      proc.on("close", (code) => {
+        if (settled) return;
+        settled = true;
+        if (code === 0) {
+          if (onProgress) onProgress(totalBytes, totalBytes);
+          resolve();
+        } else {
+          const safeErr = (token ? stderr.split(token).join("<redacted>") : stderr).trim();
+          reject(new Error(`SSH bridged FTPS upload failed (exit ${code})${safeErr ? `: ${safeErr}` : ""}`));
+        }
+      });
+      rs.pipe(proc.stdin);
+    });
+    return;
+  }
+  return origFtpUpload(host, token, localPath, remotePath, onProgress);
+};
 const stlManipulator = new STLManipulator(WORK_ROOT);
 const BBL_DIR = detectSystemBblDir(process.env.BAMBU_PROFILES_ROOT);
 
