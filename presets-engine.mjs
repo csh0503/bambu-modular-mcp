@@ -218,10 +218,10 @@ export const BUILTIN_PRESET_NAMES = [
 export const BUILTIN_MODIFIER_NAMES = [
   "scarf_seam",          // Curved surface seam hiding (conditional scarf on PLA; back+gap on PETG)
   "aligned_seam",        // Sharp corner seam hiding for boxy parts
-  "ironing",             // Smooth top ironing (auto-splits PLA 22% vs PETG 10% flow)
+  "ironing",             // Smooth top ironing (30mm/s + 10% low-flow rectilinear, zero edge burrs)
   "fuzzy_skin",          // External-only Perlin micro-matte texture (protects internal holes)
   "overhang_pro",        // Steep overhang & bridge boost (inner-outer order + 0.90 bridge flow)
-  "support_tree_easy",   // Easy-peel build-plate-only slim tree supports (PLA vs PETG Z-gap split)
+  "support_tree_easy",   // Easy-peel 5-layer rectilinear_interlaced tree supports (0.16mm@0.4 / ~0.9x@0.6)
   "support_normal_snug", // Snug normal supports for flat overhangs
   "support_bimat_zero",  // AMS zero-Z-gap multi-material support interface (auto PLA⇄PETG)
   "counterbore_bridge",  // 1-layer sacrificial bridge for downward counterbore holes
@@ -858,17 +858,12 @@ export function buildModularProfiles({
 
   if (modSet.has("ironing") && preset !== "vase") {
     proc.ironing_type = "top";
+    proc.ironing_pattern = "rectilinear";
     proc.only_one_wall_top = "1";
     proc.top_shell_layers = String(Math.max(6, Number(proc.top_shell_layers || 5)));
-    if (matInfo.family === "PETG") {
-      proc.ironing_speed = "25";
-      proc.ironing_flow = "10%";
-      proc.ironing_spacing = "0.12";
-    } else {
-      proc.ironing_speed = "35";
-      proc.ironing_flow = "22%";
-      proc.ironing_spacing = "0.15";
-    }
+    proc.ironing_speed = "30";
+    proc.ironing_flow = "10%";
+    proc.ironing_spacing = "0.15";
   }
 
   if (modSet.has("fuzzy_skin")) {
@@ -895,17 +890,23 @@ export function buildModularProfiles({
   const applyEasySupportSpacing = () => {
     proc.support_on_build_plate_only = "1";
     proc.bridge_no_support = "1";
-    proc.support_interface_pattern = "rectilinear";
+    proc.support_interface_pattern = "rectilinear_interlaced";
     if (matInfo.family === "PETG") {
-      const z = Math.max(0.24, Math.round(finalLayer * 1.15 * 100) / 100);
+      // 0.4mm @0.20 uses 0.16mm (0.8x) + 5 interlaced layers + 0.50mm spacing for 1-piece snap-off on flat & curved faces;
+      // >=0.6mm nozzle has higher melt mass so keep ~0.9x layer height to prevent thermal welding.
+      const ratio = Number(nozzle) <= 0.4 ? 0.8 : 0.9;
+      const z = Math.max(0.16, Math.round(finalLayer * ratio * 100) / 100);
       proc.support_top_z_distance = String(z);
-      proc.support_interface_top_layers = "2";
-      proc.support_interface_spacing = "0.55";
-      proc.support_object_xy_distance = "0.55";
+      proc.support_bottom_z_distance = String(finalLayer);
+      proc.support_interface_top_layers = "5";
+      proc.support_interface_spacing = "0.50";
+      proc.support_object_xy_distance = Number(nozzle) <= 0.4 ? "0.35" : "0.45";
     } else {
-      proc.support_top_z_distance = String(finalLayer);
-      proc.support_interface_top_layers = "3";
-      proc.support_interface_spacing = "0.30";
+      const zPla = Math.max(0.12, Math.round(finalLayer * 0.85 * 100) / 100);
+      proc.support_top_z_distance = String(zPla);
+      proc.support_bottom_z_distance = String(finalLayer);
+      proc.support_interface_top_layers = "4";
+      proc.support_interface_spacing = "0.28";
       proc.support_object_xy_distance = "0.35";
     }
   };
