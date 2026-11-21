@@ -61,7 +61,7 @@ Traditional 3D printer MCP servers expose **50+ granular low-level tools** direc
 |---|---|
 | `scarf_seam` | Conditional contour scarf seam on PLA; switches to back seam + 10% gap on PETG to avoid scarf valleys |
 | `aligned_seam` | Hides seams inside sharp corners on rectangular enclosures |
-| `ironing` | Smooth top-surface ironing — auto-splits **PLA `22%` @ `35mm/s`** vs. **PETG `10%` @ `25mm/s`** |
+| `ironing` | Smooth top-surface ironing (`30mm/s + 10%` low-flow anti-ooze baseline on top layers) |
 | `fuzzy_skin` | External-only Perlin micro-matte skin (`0.06mm / 0.35mm`) — keeps internal screw/bearing holes smooth |
 | `overhang_pro` | Switches wall order to `inner/outer`, `0.90` bridge flow, and disables false shallow-curve slowdowns |
 | `support_tree_easy` | Build-plate-only slim tree supports with wider anti-weld Z/XY spacing automatically applied for PETG |
@@ -71,7 +71,7 @@ Traditional 3D printer MCP servers expose **50+ granular low-level tools** direc
 | `brim_anti_warp` | `8mm` outer brim + height-based slowdown for tall thin parts or ABS/ASA/PC |
 | `brim_ears` | Easy-peel corner mouse ears |
 | `by_object` | Print-by-object sequence to eliminate cross-part travel stringing |
-| `silk_mirror` | Locks outer wall to constant `45mm/s` for uniform metallic Silk PLA gloss |
+| `silk_mirror` | Locks outer wall to constant `45mm/s` and `lockedzag` infill to eliminate sheen banding & Silk curve bulges |
 | `clear_glass` | 100% single-direction rectilinear, `35mm/s` zero-fan recipe for translucent PETG |
 
 *(Plus any community `.json` files placed inside [`community-presets/`](./community-presets/README.md)!)*

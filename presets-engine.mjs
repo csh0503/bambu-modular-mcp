@@ -962,6 +962,8 @@ export function buildModularProfiles({
   if (modSet.has("silk_mirror")) {
     proc.outer_wall_speed = pVal("outer_wall_speed", 45);
     proc.z_direction_outwall_speed_continuous = "1";
+    // Prevent localized bulging on low-angle Silk PLA curves via crosszag skin + zigzag core
+    proc.sparse_infill_pattern = "lockedzag";
     fil.no_slow_down_for_cooling_on_outwalls = ["1"];
   }
 
